@@ -286,33 +286,34 @@ abstract class PHPConnection {
 				}
 
 				$trim_buf = trim($buf);
-				if (preg_match("|[a-z0-9\-_]>[ ]*$|i", $buf) === 1) {
+				if (preg_match("|[a-zA-Z0-9\-_]>[ ]*$|", $buf) === 1) {
 					$this->Log('DEBUG: Found Prompt (Normal)');
 					$this->isEnabled = false;
 					$this->lastPrompt = LinePrompt::Normal;
 					return 0;
-				} else if (preg_match("|[a-z0-9\-_]#[ ]*$|i", $buf) === 1) {
+				} else if (preg_match("|[a-zA-Z0-9\-_]>[(a-zA-Z) ]*$|", $buf) === 1) {
+					$this->Log('DEBUG: Found Prompt (Enabled)');
+					$this->isEnabled = true;
+					$this->lastPrompt = LinePrompt::Enabled;
+					return 0;
+				//(enable) CatOS
+				} else if (preg_match("|[a-zA-Z0-9\-_]#[ ]*$|", $buf) === 1) {
 					$this->Log('DEBUG: Found Prompt (Enabled)');
 					$this->isEnabled = true;
 					$this->lastPrompt = LinePrompt::Enabled;
 					return 0;
 				} else if (!empty($this->deviceType['promptpass']) &&
-					preg_match('/' . $this->deviceType['promptpass'] . '/i', $buf) === 1) {
+					stristr($buf, $this->deviceType['promptpass'])) {
 					$this->Log('DEBUG: Found Prompt (Password)');
 					$this->lastPrompt = LinePrompt::Password;
 					return 0;
 				} else if (!empty($this->deviceType['promptuser']) &&
-					preg_match('/' . $this->deviceType['promptuser'] . '/i', $buf) === 1) {
+					stristr($buf, $this->deviceType['promptuser'])) {
 					$this->Log('DEBUG: Found Prompt (Username)');
 					$this->lastPrompt = LinePrompt::Username;
 					return 0;
-				} else if (!empty($this->deviceType['promptconfirm']) &&
-					preg_match('/' . $this->deviceType['promptconfirm'] . '/i', $buf) === 1) {
-					$this->Log('DEBUG: Found Prompt (Confirm)');
-					$this->lastPrompt = LinePrompt::Confirm;
-					return 0;
 				} else if (!empty($this->deviceType['anykey']) &&
-					preg_match('/' . $this->deviceType['anykey'] . '/i', $buf) === 1) {
+					stristr($buf, $this->deviceType['anykey'])) {
 					$this->Log('DEBUG: Found Prompt (AnyKey)');
 					$this->lastPrompt = LinePrompt::AnyKey;
 					return 0;
@@ -320,11 +321,11 @@ abstract class PHPConnection {
 					$this->Log('DEBUG: Found Prompt (Access Denied)');
 					$this->lastPrompt = LinePrompt::AccessDenied;
 					return 0;
-				} else if (preg_match('/[\d\w\[]\]\?[^\w]*$/i',$buf) === 1) {
+				} else if (preg_match('/[\d\w\[]\]\?[^\w]*$/',$buf) === 1) {
 					$this->Log('DEBUG: Found Prompt (Question)');
 					$this->lastPrompt = LinePrompt::Question;
 					return 0;
-				} else if (preg_match("|[a-z0-9\-_]:[ ]*$|i", $buf) === 1) {
+				} else if (preg_match("|[a-zA-Z0-9\-_]:[ ]*$|", $buf) === 1) {
 					$this->Log('DEBUG: Found Prompt (Colon)');
 					$this->lastPrompt = LinePrompt::Colon;
 					return 0;
